@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: streamlit-keepalive
@@ -21,6 +21,20 @@ jobs:
     steps:
       - name: Baixar o código
         uses: actions/checkout@v4
+
+      # O GitHub desativa sozinho os agendamentos de repositórios sem nenhuma
+      # atividade por 60 dias. Este passo cria um commit vazio de tempos em
+      # tempos para o repositório contar como ativo.
+      - name: Manter o agendamento ativo
+        run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          if [ $((now - last)) -gt $((30 * 86400)) ]; then
+            git config user.name "keepalive-bot"
+            git config user.email "keepalive-bot@users.noreply.github.com"
+            git commit --allow-empty -m "chore: keepalive (mantém o agendamento ativo)"
+            git push
+          fi
 
       - name: Configurar Python
         uses: actions/setup-python@v5
