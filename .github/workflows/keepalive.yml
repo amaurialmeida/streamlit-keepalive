@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: streamlit-keepalive
+  group: streamlit-keepalive-2
   cancel-in-progress: true
 
 jobs:
